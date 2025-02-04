@@ -36,6 +36,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Clone Odoo from GitHub
+        run: |
+          git clone https://github.com/odoo/odoo.git
+          cd odoo
+          git checkout 16.0
+
+
       - name: Start Odoo
         run: |
           # Ejecutar Odoo con configuración de PostgreSQL
