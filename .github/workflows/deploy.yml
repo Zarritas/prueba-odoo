@@ -1,0 +1,52 @@
+name: Deploy Odoo with PostgreSQL
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_USER: odoo
+          POSTGRES_PASSWORD: odoo
+          POSTGRES_DB: odoo
+        ports:
+          - 5432:5432
+        options: --health-cmd="pg_isready -U odoo" --health-interval=10s --health-timeout=5s --health-retries=5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.9
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxml2-dev libxslt1-dev zlib1g-dev libsasl2-dev libldap2-dev build-essential libssl-dev libmysqlclient-dev
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Start Odoo
+        run: |
+          # Ejecutar Odoo con configuración de PostgreSQL
+          nohup python3 odoo-bin --config=odoo.conf &
+
+      - name: Wait for Odoo to be ready
+        run: |
+          sleep 30  # Esperar para asegurar que Odoo haya iniciado correctamente
+
+      - name: Test deployment
+        run: |
+          # Aquí puedes agregar pruebas o verificaciones para asegurarte de que Odoo está funcionando correctamente
+          curl http://localhost:8069
+
