@@ -42,16 +42,17 @@ jobs:
           cd odoo
           git checkout 16.0
 
-
       - name: Start Odoo
         run: |
           # Ejecutar Odoo con configuración de PostgreSQL
+          cd odoo
           nohup python3 odoo-bin --config=odoo.conf &
-
-      - name: Wait for Odoo to be ready
+      - name: Wait for Odoo to start
         run: |
-          sleep 30  # Esperar para asegurar que Odoo haya iniciado correctamente
-
+          until curl -s http://localhost:8069; do
+            echo "Waiting for Odoo to start..."
+            sleep 5
+          done     
       - name: Test deployment
         run: |
           # Aquí puedes agregar pruebas o verificaciones para asegurarte de que Odoo está funcionando correctamente
