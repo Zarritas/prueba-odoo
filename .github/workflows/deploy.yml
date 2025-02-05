@@ -20,8 +20,10 @@ jobs:
 
       - name: Install PostgreSQL and configure user
         run: |
-          sudo -u postgres createuser --createdb --pwprompt --interactive odoo
-          sudo -u postgres createdb --owner=odoo odoo
+          sudo -u postgres psql -c "CREATE USER odoo WITH PASSWORD 'odoo';"
+          sudo -u postgres psql -c "CREATE DATABASE odoo OWNER odoo;"
+          sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE odoo TO odoo;"
+
 
       - name: Create Odoo virtual environment
         run: |
