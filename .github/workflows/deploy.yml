@@ -36,24 +36,38 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Clone Odoo from GitHub & install dependencies
+      - name: Cache Odoo Repository
+        uses: actions/cache@v3
+        with:
+          path: ~/odoo
+          key: odoo-${{ github.sha }}
+          restore-keys: |
+            odoo-
+
+      - name: Clone Odoo from GitHub (if not cached)
         run: |
-          git clone --depth=1 --branch 16.0 https://github.com/odoo/odoo.git
-          cd odoo
-          pip install -r ./requirements.txt
+          if [ ! -d "~/odoo" ]; then
+            git clone --depth=1 --branch 16.0 https://github.com/odoo/odoo.git ~/odoo
+          else
+            echo "Odoo repository restored from cache."
+          fi
+
+      - name: Install Odoo dependencies
+        run: |
+          cd ~/odoo
+          pip install -r requirements.txt
 
       - name: Start Odoo
         run: |
-          # Ejecutar Odoo con configuración de PostgreSQL
-          nohup python3 ./odoo/odoo-bin --config=./odoo.conf -d odoo &
+          nohup python3 ~/odoo/odoo-bin --config=./odoo.conf -d odoo &
+
       - name: Wait for Odoo to start
         run: |
           until curl -s http://localhost:8069; do
             echo "Waiting for Odoo to start..."
             sleep 5
           done     
+
       - name: Test deployment
         run: |
-          # Aquí puedes agregar pruebas o verificaciones para asegurarte de que Odoo está funcionando correctamente
           curl http://localhost:8069
-
