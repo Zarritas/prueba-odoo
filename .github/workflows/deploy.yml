@@ -27,7 +27,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
-          python-version: 3.9
+          python-version: 3.10
 
       - name: Install dependencies
         run: |
@@ -42,10 +42,13 @@ jobs:
           cd odoo
           git checkout 16.0
 
+      - name: Install pip dependencies
+        run: |
+          pip install -r requirements.txt
+
       - name: Start Odoo
         run: |
           # Ejecutar Odoo con configuración de PostgreSQL
-          cd odoo
           nohup python3 odoo-bin --config=odoo.conf &
       - name: Wait for Odoo to start
         run: |
