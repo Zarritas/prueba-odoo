@@ -58,6 +58,7 @@ jobs:
       - name: Start Odoo
         run: |
           cd /opt/odoo
+          source odoo-venv/bin/activate
           ./odoo-bin -c /etc/odoo.conf &
         
       - name: Wait for Odoo to start
