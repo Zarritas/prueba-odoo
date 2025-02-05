@@ -27,11 +27,11 @@ jobs:
       - name: Start Odoo in Docker
         run: |
           docker run -d --name odoo \
-            -e HOST=localhost \  # Usamos localhost en lugar de un alias de contenedor
+            -e HOST=localhost \
             -e USER=odoo \
             -e PASSWORD=odoo \
             -e DATABASE=odoo \
-            --network host \  # Permite que los contenedores compartan red con el host
+            --network host \
             -p 8069:8069 odoo:16
 
       - name: Wait for Odoo to start
