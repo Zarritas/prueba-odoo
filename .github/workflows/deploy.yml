@@ -33,15 +33,11 @@ jobs:
       - name: Create Odoo virtual environment
         run: |
           cd /opt
-          sudo mkdir odoo
+          git clone --depth=1 --branch 16.0 https://github.com/odoo/odoo.git ./odoo
           sudo chown $USER:$USER odoo
           cd odoo
           python3 -m venv odoo-venv
           source odoo-venv/bin/activate
-
-      - name: Clone Odoo repository and install dependencies
-        run: |
-          git clone --branch 16.0 https://github.com/odoo/odoo.git ./odoo
           pip install -r /opt/odoo/requirements.txt
 
       - name: Configure Odoo
