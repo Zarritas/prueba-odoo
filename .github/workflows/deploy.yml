@@ -24,42 +24,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v3
-        with:
-          python-version: "3.10"
-
-      - name: Install dependencies
+      - name: Start Odoo in Docker
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libxml2-dev libxslt1-dev zlib1g-dev libsasl2-dev libldap2-dev build-essential libssl-dev libmysqlclient-dev
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Cache Odoo Repository
-        uses: actions/cache@v3
-        with:
-          path: ~/odoo
-          key: odoo-${{ github.sha }}
-          restore-keys: |
-            odoo-
-
-      - name: Clone Odoo from GitHub (if not cached)
-        run: |
-          if [ ! -d "~/odoo" ]; then
-            git clone --depth=1 --branch 16.0 https://github.com/odoo/odoo.git ~/odoo
-          else
-            echo "Odoo repository restored from cache."
-          fi
-
-      - name: Install Odoo dependencies
-        run: |
-          cd ~/odoo
-          pip install -r requirements.txt
-
-      - name: Start Odoo
-        run: |
-          nohup python3 ~/odoo/odoo-bin --config=./odoo.conf -d odoo -i base &
+          docker run -d --name odoo --link postgres \
+            -e HOST=db \
+            -e USER=odoo \
+            -e PASSWORD=odoo \
+            -p 8069:8069 odoo:16
 
       - name: Wait for Odoo to start
         run: |
@@ -68,6 +39,6 @@ jobs:
             sleep 5
           done     
 
-      - name: Test deployment
+      - name: Test Odoo Deployment
         run: |
           curl http://localhost:8069
