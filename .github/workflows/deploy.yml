@@ -27,7 +27,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
-          python-version: 3.9
+          python-version: 3.10
 
       - name: Install dependencies
         run: |
@@ -38,9 +38,8 @@ jobs:
 
       - name: Clone Odoo from GitHub & install dependencies
         run: |
-          git clone https://github.com/odoo/odoo.git
+          git clone --depth=1 --branch 16.0 https://github.com/odoo/odoo.git
           cd odoo
-          git checkout 16.0
           pip install -r ./requirements.txt
 
       - name: Start Odoo
