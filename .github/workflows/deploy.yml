@@ -49,7 +49,7 @@ jobs:
       - name: Start Odoo
         run: |
           # Ejecutar Odoo con configuración de PostgreSQL
-          nohup python3 ./odoo/odoo-bin --config=./odoo.conf &
+          nohup python3 ./odoo/odoo-bin --config=./odoo.conf -d odoo -i base &
       - name: Wait for Odoo to start
         run: |
           until curl -s http://localhost:8069; do
