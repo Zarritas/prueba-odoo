@@ -33,7 +33,7 @@ jobs:
       - name: Create Odoo virtual environment
         run: |
           cd /opt
-          git clone --branch 16.0 https://github.com/odoo/odoo.git ./odoo
+          git clone --depth=1 --branch 16.0 https://github.com/odoo/odoo.git ./odoo
           sudo chown $USER:$USER odoo
           cd odoo
           python3 -m venv odoo-venv
@@ -63,7 +63,7 @@ jobs:
         run: |
           cd /opt/odoo
           source odoo-venv/bin/activate
-          ./odoo-bin -c /etc/odoo.conf &
+          python ./odoo-bin -c /etc/odoo.conf &
 
       - name: Wait for Odoo to start
         run: |
