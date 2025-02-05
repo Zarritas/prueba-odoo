@@ -41,6 +41,7 @@ jobs:
 
       - name: Clone Odoo repository and install dependencies
         run: |
+          cwd
           git clone --branch 16.0 https://github.com/odoo/odoo.git .
           pip install -r /opt/odoo/requirements.txt
 
