@@ -63,7 +63,8 @@ jobs:
         run: |
           cd /opt/odoo
           source odoo-venv/bin/activate
-          nohup python ./odoo-bin -c /etc/odoo.conf --logfile=/var/log/odoo/odoo.log --log-level=info &
+          nohup python ./odoo-bin -c /etc/odoo.conf &
+          tail -f /var/log/odoo/odoo.log
 
       - name: Wait for Odoo to start
         run: |
