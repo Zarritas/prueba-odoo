@@ -9,45 +9,59 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:13
-        env:
-          POSTGRES_USER: odoo
-          POSTGRES_PASSWORD: odoo
-          POSTGRES_DB: odoo
-        ports:
-          - 5432:5432
-        options: --health-cmd="pg_isready -U odoo" --health-interval=10s --health-timeout=5s --health-retries=5
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v3
-        with:
-          python-version: "3.10"
-
-      - name: Install dependencies
+      - name: Update and install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libxml2-dev libxslt1-dev zlib1g-dev libsasl2-dev libldap2-dev build-essential libssl-dev libmysqlclient-dev
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          sudo apt-get install -y python3-dev python3-venv python3-pip libxml2-dev libxslt1-dev zlib1g-dev libsasl2-dev libldap2-dev build-essential libssl-dev libmysqlclient-dev postgresql wkhtmltopdf
 
-      - name: Install Wkhtmltopdf for reports
+      - name: Start PostgreSQL service
         run: |
-          sudo apt-get install -y wkhtmltopdf
+          sudo systemctl start postgresql
+          sudo systemctl enable postgresql
+          sudo systemctl status postgresql
 
-      - name: Update pg_hba.conf for md5 authentication
+      - name: Install PostgreSQL and configure user
         run: |
-          sudo sed -i "s/local   all             all                                     peer/local   all             all                                     md5/" /etc/postgresql/*/main/pg_hba.conf
-          sudo systemctl restart postgresql
+          sudo -u postgres psql -c "CREATE USER odoo WITH PASSWORD 'odoo';"
+          sudo -u postgres psql -c "CREATE DATABASE odoo OWNER odoo;"
+          sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE odoo TO odoo;"
 
-      - name: Set password for odoo user in PostgreSQL
+      - name: Create Odoo virtual environment
         run: |
-          sudo -u postgres psql -c "ALTER USER odoo WITH PASSWORD 'odoo';"
+          cd /opt
+          sudo mkdir odoo
+          sudo chown $USER:$USER odoo
+          cd odoo
+          python3 -m venv odoo-venv
+          source odoo-venv/bin/activate
+
+      - name: Clone Odoo repository and install dependencies
+        run: |
+          git clone --branch 16.0 https://github.com/odoo/odoo.git .
+          pip install -r /opt/odoo/requirements.txt
+
+      - name: Crear archivo de configuración de Odoo
+        run: |
+          sudo bash -c 'cat > /etc/odoo.conf <<EOF
+          [options]
+             admin_passwd = admin
+             db_host = False
+             db_port = False
+             db_user = odoo
+             db_password = odoo
+             db_name = odoo
+             addons_path = /opt/odoo/addons
+             logfile = /var/log/odoo/odoo.log
+          EOF'
+
+      - name: Create necessary directories for Odoo logs
+        run: |
+          sudo mkdir /var/log/odoo
+          sudo chown $USER:$USER /var/log/odoo
 
       - name: Start Odoo
         run: |
@@ -60,8 +74,12 @@ jobs:
           until curl -s http://localhost:8069; do
             echo "Waiting for Odoo to start..."
             sleep 5
-          done     
+          done
 
-      - name: Test deployment
+      - name: Display Odoo URL
+        run: |
+          echo "Odoo is running at http://localhost:8069"
+
+      - name: Test Odoo Deployment
         run: |
           curl http://localhost:8069
