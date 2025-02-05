@@ -27,7 +27,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
-          python-version: 3.10
+          python-version: "3.10"
 
       - name: Install dependencies
         run: |
@@ -59,7 +59,7 @@ jobs:
 
       - name: Start Odoo
         run: |
-          nohup python3 ~/odoo/odoo-bin --config=./odoo.conf -d odoo &
+          nohup python3 ~/odoo/odoo-bin --config=./odoo.conf -d odoo -i base &
 
       - name: Wait for Odoo to start
         run: |
