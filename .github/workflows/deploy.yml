@@ -33,15 +33,11 @@ jobs:
       - name: Create Odoo virtual environment
         run: |
           cd /opt
-          sudo mkdir odoo
+          git clone --branch 16.0 https://github.com/odoo/odoo.git ./odoo
           sudo chown $USER:$USER odoo
           cd odoo
           python3 -m venv odoo-venv
           source odoo-venv/bin/activate
-
-      - name: Clone Odoo repository and install dependencies
-        run: |
-          git clone --branch 16.0 https://github.com/odoo/odoo.git .
           pip install -r /opt/odoo/requirements.txt
 
       - name: Crear archivo de configuración de Odoo
@@ -49,8 +45,8 @@ jobs:
           sudo bash -c 'cat > /etc/odoo.conf <<EOF
           [options]
              admin_passwd = admin
-             db_host = False
-             db_port = False
+             db_host = localhost
+             db_port = 5432
              db_user = odoo
              db_password = odoo
              db_name = odoo
